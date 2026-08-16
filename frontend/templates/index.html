@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mysha — Hybrid Neural & Stylometric Text Analysis Engine</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.30.1.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">◈</span>
+                <h1>Mysha</h1>
+                <span class="logo-tagline">Hybrid AI vs Human & Multi-Author Intelligence</span>
+            </div>
+            <div class="header-badge">
+                <span class="pulse-dot"></span> Waveform Engine V2 Active
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-card">
+                <h2>Analyze Text Structure & Authorship</h2>
+                <p class="subtitle">Extract 23 mathematical stylometric dimensions combined with real-time neural token perplexity waveforms.</p>
+
+                <div class="tab-content active" id="tab-paste">
+                    <textarea id="text-input" placeholder="Paste your text here for deep mathematical analysis (creative writing, essays, code postmortems, mixed articles)..." rows="9"></textarea>
+                </div>
+
+                <div class="sample-prompts">
+                    <span>Try Sample:</span>
+                    <button class="btn-sample" id="sample-ai">AI Formal Essay</button>
+                    <button class="btn-sample" id="sample-human">Human Creative Memoir</button>
+                    <button class="btn-sample" id="sample-story">AI Literary Fiction</button>
+                </div>
+
+                <button class="btn-analyze" id="btn-analyze">
+                    <span class="btn-text">Execute Hybrid Detection</span>
+                    <span class="btn-loading hidden">
+                        <span class="spinner"></span> Running Neural Waveform & Stylometry...
+                    </span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Results Section (hidden initially) -->
+        <section class="results-section hidden" id="results-section">
+
+            <!-- Summary Cards -->
+            <div class="summary-grid">
+                <!-- AI/Human Detection Card -->
+                <div class="result-card detection-card">
+                    <h3>AI vs Human Likelihood</h3>
+                    <div class="detection-gauge" id="detection-gauge"></div>
+                    <div class="detection-verdict" id="detection-verdict"></div>
+                    <div class="detection-confidence" id="detection-confidence"></div>
+                </div>
+
+                <!-- Authorship Card -->
+                <div class="result-card authorship-card">
+                    <h3>Authorship Count Prediction</h3>
+                    <div class="author-count" id="author-count"></div>
+                    <div class="authorship-verdict" id="authorship-verdict"></div>
+                    <div class="authorship-confidence" id="authorship-confidence"></div>
+                </div>
+
+                <!-- Neural Waveform Stats -->
+                <div class="result-card stats-card">
+                    <h3>Neural Perplexity Signals</h3>
+                    <div class="stats-grid" id="neural-stats-grid"></div>
+                </div>
+            </div>
+
+            <!-- Token Waveform Chart -->
+            <div class="evidence-section" id="waveform-card">
+                <h3>Token-Level Perplexity Waveform</h3>
+                <p class="section-subtitle">Real-time log-probability trajectory across sequence tokens (Wave dynamics model)</p>
+                <div id="waveform-chart" style="height: 220px;"></div>
+            </div>
+
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+                <h3>Mathematical Evidence Trail</h3>
+                <p class="section-subtitle">Ranked linguistic and neural signals driving the classification verdict</p>
+                <div class="evidence-list" id="evidence-list"></div>
+            </div>
+
+            <!-- Authorship Deep Dive -->
+            <div class="authorship-detail-section">
+                <h3>Multi-Author Clustering & Style Shifts</h3>
+
+                <div class="analysis-grid">
+                    <div class="chart-card">
+                        <h4>Style Distance Linkage</h4>
+                        <p class="chart-desc">Hierarchical Ward clustering of text segment features</p>
+                        <div id="dendrogram-chart" class="chart-container"></div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h4>Cluster Separation Score</h4>
+                        <p class="chart-desc">Silhouette profile evaluating candidate author counts (k=2..5)</p>
+                        <div id="silhouette-chart" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <div class="style-shifts-section" id="style-shifts-section">
+                    <h4>Detected Style Disruption Boundaries</h4>
+                    <div id="style-shifts-list"></div>
+                </div>
+            </div>
+
+            <!-- Feature Breakdown -->
+            <div class="features-section">
+                <h3>Extracted 23-Dimension Feature Matrix</h3>
+                <div class="features-toggle">
+                    <button class="btn-toggle" id="toggle-features">Toggle Full Feature Table ▼</button>
+                </div>
+                <div class="features-table hidden" id="features-table"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Mysha Text Intelligence — Hybrid Neural Waveform Engine & Stylometric Framework</p>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
