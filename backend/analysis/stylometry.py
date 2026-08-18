@@ -42,20 +42,28 @@ def extract_features(text: str) -> dict:
     ttr = n_vocab / n_words if n_words > 0 else 0
 
     freq = Counter(words)
-    hapax = sum(1 for w, c in freq.items() if c == 1)
-    hapax_ratio = hapax / n_vocab if n_vocab > 0 else 0
+    
+    # Bayesian / Sample-size smoothing for short texts to prevent hapax breakdown
+    # Clayton meeting takeaway: Hapax & Dis legomena ratios break down when N is small (< 100)
+    smooth_factor = min(1.0, n_words / 100.0) if n_words > 0 else 0.0
+    
+    raw_hapax = sum(1 for w, c in freq.items() if c == 1)
+    hapax_ratio = (raw_hapax / n_vocab) * smooth_factor if n_vocab > 0 else 0
 
-    dis = sum(1 for w, c in freq.items() if c == 2)
-    dis_ratio = dis / n_vocab if n_vocab > 0 else 0
+    raw_dis = sum(1 for w, c in freq.items() if c == 2)
+    dis_ratio = (raw_dis / n_vocab) * smooth_factor if n_vocab > 0 else 0
 
     freq_spectrum = Counter(freq.values())
     m1 = n_words
     m2 = sum(i * i * vi for i, vi in freq_spectrum.items())
-    yules_k = 10000 * (m2 - m1) / (m1 * m1) if m1 > 1 else 0
+    
+    # Yule's K is heavily unstable on very short texts; apply dampening
+    raw_yules_k = 10000 * (m2 - m1) / (m1 * m1) if m1 > 1 else 0
+    yules_k = raw_yules_k * smooth_factor
 
     simpsons_d = 1 - sum(c * (c - 1) for c in freq.values()) / (n_words * (n_words - 1)) if n_words > 1 else 0
     brunets_w = n_words ** (n_vocab ** -0.172) if n_vocab > 0 else 0
-    honores_r = 100 * math.log(n_words) / (1 - hapax / n_vocab) if n_vocab > 0 and hapax != n_vocab else 0
+    honores_r = 100 * math.log(n_words) / (1 - (raw_hapax / n_vocab) + 1e-6) if n_vocab > 0 and raw_hapax != n_vocab else 0
 
     avg_sentence_len = np.mean(sentence_lengths) if sentence_lengths else 0
     std_sentence_len = np.std(sentence_lengths) if len(sentence_lengths) > 1 else 0

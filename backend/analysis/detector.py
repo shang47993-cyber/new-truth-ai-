@@ -11,6 +11,11 @@ import json
 import pickle
 import numpy as np
 
+# Ensure OpenMP runtime is found if xgboost is imported or dynamically loaded
+_DYLIBS = os.path.expanduser("~/workspace/mysha/.venv/lib/python3.9/site-packages/sklearn/.dylibs")
+if os.path.exists(_DYLIBS):
+    os.environ["DYLD_LIBRARY_PATH"] = f"{_DYLIBS}:{os.environ.get('DYLD_LIBRARY_PATH', '')}".rstrip(":")
+
 from .stylometry import extract_features
 from .neural_waveform import compute_token_waveform, get_neural_ai_score
 from .transformer_detector import detect_with_transformer
@@ -57,11 +62,21 @@ def detect_ai_vs_human(text: str) -> dict:
     neural_score_data = get_neural_ai_score(wave_metrics)
     neural_bias = neural_score_data["neural_ai_bias"] # -1.5 to +1.5
 
-    # --- ENGINE 3: 23-Dimension Stylometric Classifier ---
-    feature_vec = np.array([[features.get(f, 0) for f in FEATURE_NAMES]])
+    # --- ENGINE 3: 23-Dimension Stylometric Classifier (Calibrated XGBoost / Trees) ---
+    feature_vec = np.array([[features.get(f, 0) for f in FEATURE_NAMES]], dtype=np.float32)
     feature_vec = np.nan_to_num(feature_vec, nan=0.0, posinf=0.0, neginf=0.0)
     feature_scaled = _scaler.transform(feature_vec)
-    sty_logit = float(_model.decision_function(feature_scaled)[0])
+    
+    # Check if model supports predict_proba or decision_function
+    if hasattr(_model, "predict_proba"):
+        sty_ai_prob = float(_model.predict_proba(feature_scaled)[0][1])
+        sty_logit = np.log(max(sty_ai_prob, 1e-4) / max(1.0 - sty_ai_prob, 1e-4))
+    elif hasattr(_model, "decision_function"):
+        sty_logit = float(_model.decision_function(feature_scaled)[0])
+        sty_ai_prob = 1.0 / (1.0 + np.exp(-sty_logit))
+    else:
+        sty_logit = 0.0
+        sty_ai_prob = 0.5
 
     # --- ENSEMBLE DECISION FUSION ---
     # Convert transformer probability to logit
@@ -103,7 +118,16 @@ def detect_ai_vs_human(text: str) -> dict:
         })
 
     # Stylometric Evidence
-    if hasattr(_model, "coef_"):
+    if hasattr(_model, "feature_importances_") or hasattr(_model, "estimator_"):
+        evidence.append({
+            "signal": "Stylometric Tree Model (XGBoost)",
+            "direction": "AI" if sty_ai_prob > 0.5 else "Human",
+            "value": round(sty_ai_prob * 100, 1),
+            "contribution": round(sty_logit, 3),
+            "description": f"Ensemble tree stylometry indicates {sty_ai_prob*100:.1f}% AI probability",
+            "strength": "strong" if abs(sty_ai_prob - 0.5) > 0.25 else "moderate"
+        })
+    elif hasattr(_model, "coef_"):
         coefs = _model.coef_[0]
         scaled_vals = feature_scaled[0]
         contributions = coefs * scaled_vals
