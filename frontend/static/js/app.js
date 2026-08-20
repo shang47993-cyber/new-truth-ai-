@@ -80,12 +80,47 @@ function renderResults(analysis) {
     renderDetection(analysis.detection);
     renderAuthorship(analysis.authorship);
     renderNeuralStats(analysis.detection.neural_metrics);
+    renderSentenceHeatmap(analysis.detection.sentence_analysis);
     renderWaveform(analysis.detection.neural_metrics);
     renderEvidence(analysis.detection.evidence);
     renderDendrogram(analysis.authorship);
     renderSilhouette(analysis.authorship);
     renderStyleShifts(analysis.authorship.style_shifts);
     renderFeatures(analysis.features);
+}
+
+function renderSentenceHeatmap(sentences) {
+    const card = document.getElementById('sentence-heatmap-card');
+    const container = document.getElementById('sentence-heatmap');
+    if (!sentences || sentences.length === 0) {
+        card.classList.add('hidden');
+        return;
+    }
+    card.classList.remove('hidden');
+
+    container.innerHTML = sentences.map(s => {
+        let bgStyle = '';
+        let badgeColor = '';
+        if (s.tag === 'ai') {
+            bgStyle = 'background: rgba(239, 68, 68, 0.15); border-left: 3px solid #ef4444;';
+            badgeColor = 'color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);';
+        } else if (s.tag === 'human') {
+            bgStyle = 'background: rgba(16, 185, 129, 0.15); border-left: 3px solid #10b981;';
+            badgeColor = 'color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4);';
+        } else {
+            bgStyle = 'background: rgba(245, 158, 11, 0.15); border-left: 3px solid #f59e0b;';
+            badgeColor = 'color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);';
+        }
+
+        return `
+            <div style="${bgStyle} padding: 0.75rem 1rem; margin-bottom: 0.6rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <span style="color: #e8e8f0; font-size: 0.92rem; line-height: 1.4;">${s.sentence}</span>
+                <span style="${badgeColor} font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 12px; white-space: nowrap; font-weight: 600;">
+                    ${s.ai_probability}% AI
+                </span>
+            </div>
+        `;
+    }).join('');
 }
 
 function renderDetection(detection) {
@@ -155,9 +190,9 @@ function renderNeuralStats(metrics) {
 
     const items = [
         { label: 'Perplexity (PPL)', value: metrics.perplexity || '0' },
-        { label: 'Mean Token LogProb', value: metrics.mean_log_prob || '0' },
-        { label: 'High Certainty Density', value: `${((metrics.frac_low_entropy || 0) * 100).toFixed(1)}%` },
-        { label: 'Waveform Volatility', value: metrics.wave_volatility || '0' },
+        { label: 'GLTR Top-10 Density', value: `${((metrics.gltr_top10 || 0) * 100).toFixed(1)}%` },
+        { label: 'GLTR Tail Rank (>1k)', value: `${((metrics.gltr_tail1000 || 0) * 100).toFixed(1)}%` },
+        { label: 'Wave Volatility', value: metrics.wave_volatility || '0' },
     ];
 
     grid.innerHTML = items.map(item => `

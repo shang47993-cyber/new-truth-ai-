@@ -1,7 +1,9 @@
 {
-  "model_type": "Calibrated XGBoost Classifier (with Random Forest Baseline)",
-  "cv_accuracy_xgb": 0.8,
-  "cv_accuracy_rf": 0.72,
+  "model_type": "Multi-Engine Stacking Meta-Learner (Transformer + GLTR + XGBoost Stylometry)",
+  "cv_accuracy_meta": 0.6,
+  "cv_f1_meta": 0.6,
+  "cv_roc_auc_meta": 0.7155555555555556,
+  "cv_accuracy_sty": 0.7,
   "feature_names": [
     "type_token_ratio",
     "hapax_legomena_ratio",
@@ -27,30 +29,23 @@
     "cv_paragraph_length",
     "contraction_ratio"
   ],
-  "feature_importances": {
-    "type_token_ratio": 0.0,
-    "hapax_legomena_ratio": 0.0449,
-    "dis_legomena_ratio": 0.1034,
-    "yules_k": 0.0821,
-    "simpsons_diversity": 0.0475,
-    "honores_r": 0.1043,
-    "entropy": 0.0,
-    "avg_sentence_length": 0.0362,
-    "std_sentence_length": 0.0446,
-    "cv_sentence_length": 0.0,
-    "avg_word_length": 0.0707,
-    "std_word_length": 0.1277,
-    "punctuation_ratio": 0.0347,
-    "comma_ratio": 0.0158,
-    "semicolon_ratio": 0.0,
-    "exclamation_ratio": 0.0,
-    "question_ratio": 0.0,
-    "function_word_ratio": 0.0438,
-    "zipf_coefficient": 0.0,
-    "zipf_r_squared": 0.1893,
-    "burstiness": 0.055,
-    "cv_paragraph_length": 0.0,
-    "contraction_ratio": 0.0
+  "meta_feature_names": [
+    "tr_ai_prob",
+    "neural_bias",
+    "perplexity",
+    "gltr_top10",
+    "gltr_tail1000",
+    "wave_volatility",
+    "sty_ai_prob"
+  ],
+  "meta_weights": {
+    "tr_ai_prob": 0.4466,
+    "neural_bias": 0.4984,
+    "perplexity": -0.1445,
+    "gltr_top10": 0.1496,
+    "gltr_tail1000": -0.0078,
+    "wave_volatility": -0.0972,
+    "sty_ai_prob": 0.662
   },
-  "sample_count": 25
+  "sample_count": 30
 }
