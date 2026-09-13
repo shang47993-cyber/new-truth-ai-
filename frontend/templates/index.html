@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mysha — Hybrid Neural & Stylometric Text Analysis Engine</title>
+    <title>Mysha — Hybrid AI vs Human & Authorship Intelligence Platform</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.plot.ly/plotly-2.30.1.min.js"></script>
 </head>
@@ -17,7 +17,7 @@
                 <span class="logo-tagline">Hybrid AI vs Human & Multi-Author Intelligence</span>
             </div>
             <div class="header-badge">
-                <span class="pulse-dot"></span> Waveform Engine V2 Active
+                <span class="pulse-dot"></span> Waveform Engine V2.5 + Multi-Doc Upload Active
             </div>
         </div>
     </header>
@@ -27,24 +27,47 @@
         <!-- Input Section -->
         <section class="input-section">
             <div class="input-card">
-                <h2>Analyze Text Structure & Authorship</h2>
-                <p class="subtitle">Extract 23 mathematical stylometric dimensions combined with real-time neural token perplexity waveforms.</p>
+                <h2>Analyze Text Structure, Origins & Authorship</h2>
+                <p class="subtitle">Extract 24 mathematical stylometric dimensions combined with real-time neural token perplexity waveforms and multi-engine stacking.</p>
 
-                <div class="tab-content active" id="tab-paste">
-                    <textarea id="text-input" placeholder="Paste your text here for deep mathematical analysis (creative writing, essays, code postmortems, mixed articles)..." rows="9"></textarea>
+                <!-- Input Method Tabs -->
+                <div class="input-tabs">
+                    <button class="tab-btn active" id="tab-btn-text" data-tab="paste">Direct Text Input</button>
+                    <button class="tab-btn" id="tab-btn-file" data-tab="upload">Upload Document (PDF, DOCX, TXT, CSV)</button>
                 </div>
 
-                <div class="sample-prompts">
-                    <span>Try Sample:</span>
-                    <button class="btn-sample" id="sample-ai">AI Formal Essay</button>
-                    <button class="btn-sample" id="sample-human">Human Creative Memoir</button>
-                    <button class="btn-sample" id="sample-story">AI Literary Fiction</button>
+                <!-- Tab 1: Paste Text -->
+                <div class="tab-content active" id="tab-paste">
+                    <textarea id="text-input" placeholder="Paste text here for deep mathematical analysis (creative writing, essays, code postmortems, mixed articles, student papers)..." rows="9"></textarea>
+                    
+                    <div class="sample-prompts">
+                        <span>Try Benchmark Sample:</span>
+                        <button class="btn-sample" id="sample-ai">AI Formal Essay</button>
+                        <button class="btn-sample" id="sample-human">Human Creative Memoir</button>
+                        <button class="btn-sample" id="sample-story">AI Literary Fiction</button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: File Upload Dropzone -->
+                <div class="tab-content" id="tab-upload">
+                    <div class="dropzone" id="file-dropzone">
+                        <div class="dropzone-icon">📄</div>
+                        <h3>Drag & drop your document here</h3>
+                        <p class="dropzone-hint">Supports PDF, DOCX (Word), TXT, Markdown, and CSV files (up to 16MB)</p>
+                        <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md,.csv" class="hidden-file-input">
+                        <button type="button" class="btn-browse" id="btn-browse">Browse Local Files</button>
+                    </div>
+                    <div class="file-preview-bar hidden" id="file-preview-bar">
+                        <span class="file-name" id="selected-file-name">document.pdf</span>
+                        <span class="file-size" id="selected-file-size">(0 KB)</span>
+                        <button type="button" class="btn-remove-file" id="btn-remove-file" title="Remove file">✕</button>
+                    </div>
                 </div>
 
                 <button class="btn-analyze" id="btn-analyze">
-                    <span class="btn-text">Execute Hybrid Detection</span>
+                    <span class="btn-text">Execute Hybrid Intelligence Analysis</span>
                     <span class="btn-loading hidden">
-                        <span class="spinner"></span> Running Neural Waveform & Stylometry...
+                        <span class="spinner"></span> Running Neural Waveform, Stacking & Stylometry...
                     </span>
                 </button>
             </div>
@@ -52,6 +75,12 @@
 
         <!-- Results Section (hidden initially) -->
         <section class="results-section hidden" id="results-section">
+
+            <!-- Source Banner -->
+            <div class="source-banner" id="source-banner">
+                <span class="source-icon">📊</span>
+                <span id="source-label">Source: Uploaded Document (report.pdf) — 1,420 words analyzed</span>
+            </div>
 
             <!-- Summary Cards -->
             <div class="summary-grid">
@@ -88,14 +117,14 @@
             <!-- Token Waveform Chart -->
             <div class="evidence-section" id="waveform-card">
                 <h3>Token-Level Perplexity Waveform</h3>
-                <p class="section-subtitle">Real-time log-probability trajectory across sequence tokens (Wave dynamics model)</p>
+                <p class="section-subtitle">Real-time log-probability trajectory across sequence tokens (SeqXGPT wave dynamics model)</p>
                 <div id="waveform-chart" style="height: 220px;"></div>
             </div>
 
             <!-- Evidence Section -->
             <div class="evidence-section">
                 <h3>Mathematical Evidence Trail</h3>
-                <p class="section-subtitle">Ranked linguistic and neural signals driving the classification verdict</p>
+                <p class="section-subtitle">Ranked linguistic, syntactic, and neural signals driving the classification verdict</p>
                 <div class="evidence-list" id="evidence-list"></div>
             </div>
 
@@ -118,24 +147,24 @@
                 </div>
 
                 <div class="style-shifts-section" id="style-shifts-section">
-                    <h4>Detected Style Disruption Boundaries</h4>
+                    <h4>Style Shift Boundary Log</h4>
                     <div id="style-shifts-list"></div>
                 </div>
             </div>
 
-            <!-- Feature Breakdown -->
+            <!-- Full Stylometric Feature Matrix -->
             <div class="features-section">
-                <h3>Extracted 23-Dimension Feature Matrix</h3>
-                <div class="features-toggle">
-                    <button class="btn-toggle" id="toggle-features">Toggle Full Feature Table ▼</button>
+                <div class="features-header">
+                    <h3>24-Dimension Mathematical Stylometric Vectors</h3>
+                    <button class="btn-toggle-features" id="btn-toggle-features">Expand Feature Vector Matrix ▾</button>
                 </div>
-                <div class="features-table hidden" id="features-table"></div>
+                <div class="features-grid hidden" id="features-grid"></div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <p>Mysha Text Intelligence — Hybrid Neural Waveform Engine & Stylometric Framework</p>
+        <p>Mysha AI Research Platform • Powered by SeqXGPT Waveform & Calibrated Multi-Engine Stacking</p>
     </footer>
 
     <script src="/static/js/app.js"></script>
