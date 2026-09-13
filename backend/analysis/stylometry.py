@@ -24,6 +24,18 @@ def tokenize_sentences(text: str) -> list[str]:
     return [s.strip() for s in sentences if s.strip()]
 
 
+def separate_dialogue_narrative(text: str) -> tuple[str, str, float]:
+    """Separates quoted dialogue from narrative prose and computes dialogue ratio."""
+    dialogue_parts = re.findall(r'["“\'](.*?)["”\']', text)
+    dialogue_text = " ".join(dialogue_parts)
+    narrative_text = re.sub(r'["“\'](.*?)["”\']', '', text)
+    
+    total_words = len(tokenize_words(text))
+    dialogue_words = len(tokenize_words(dialogue_text))
+    dialogue_ratio = dialogue_words / max(total_words, 1)
+    return dialogue_text, narrative_text, round(dialogue_ratio, 4)
+
+
 def extract_features(text: str) -> dict:
     """Extract 23 normalized stylometric features with NaN safety guards."""
     words = tokenize_words(text)

@@ -168,8 +168,8 @@ def get_neural_ai_score(wave_metrics: dict) -> dict:
     if volatility < 1.6:
         neural_bias += 0.4
         signals.append({"signal": "Uniform Token Waveform", "desc": "Smooth, artificial token transitions across sequence", "dir": "AI"})
-    elif volatility > 2.6:
-        neural_bias -= 0.4
+    elif volatility > 3.0:
+        neural_bias -= 0.3
         signals.append({"signal": "Volatile Token Waveform", "desc": "Human burstiness and irregular rhythm spikes", "dir": "Human"})
 
     return {

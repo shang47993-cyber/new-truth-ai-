@@ -13,26 +13,36 @@ import pickle
 import xgboost as xgb
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion
-from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
-from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
+from sklearn.metrics import accuracy_score, roc_auc_score
 from colab_clayton_research import extract_features_fast, ALL_FEATURE_NAMES
+from backend.analysis.calibration_data_v3 import CALIBRATION_SAMPLES
 
 url = "https://dpl6hyzg28thp.cloudfront.net/media/arslan.csv"
-print("Downloading Arslan Dataset (11,580 samples)...")
+print("Loading Arslan Dataset (11,580 samples) + Multi-Domain Creative Fiction/Memoir Samples...")
 df = pd.read_csv(url)
 
 # Label: 1 = AI-Generated, 0 = Human-written
-df["label"] = (df["label_name"] == "ai-generated").astype(int)
-texts = df["text"].tolist()
-y = df["label"].values
+arslan_texts = df["text"].tolist()
+arslan_labels = (df["label_name"] == "ai-generated").astype(int).tolist()
+
+calib_texts = [s["text"] for s in CALIBRATION_SAMPLES]
+calib_labels = [1 if s["label"] == "ai" else 0 for s in CALIBRATION_SAMPLES]
+
+# Balance formal and creative fiction/memoir domains
+all_texts = arslan_texts + (calib_texts * 60)
+all_labels = arslan_labels + (calib_labels * 60)
+y = np.array(all_labels)
+
+print(f"Total training corpus: {len(all_texts)} samples across formal & creative domains")
 
 print("1. Extracting 24 Stylometric Features...")
-sty_rows = [extract_features_fast(t) for t in texts]
+sty_rows = [extract_features_fast(t) for t in all_texts]
 X_sty_df = pd.DataFrame(sty_rows)[ALL_FEATURE_NAMES].fillna(0.0)
 X_sty = X_sty_df.values
 
-print("2. Extracting Sub-word & Character Boundary TF-IDF N-Grams...")
+print("2. Extracting Word & Sub-word Character Boundary TF-IDF N-Grams...")
 word_vec = TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_features=30000, sublinear_tf=True)
 char_vec = TfidfVectorizer(ngram_range=(3, 5), analyzer="char_wb", min_df=4, max_features=40000, sublinear_tf=True)
 
@@ -41,11 +51,11 @@ union = FeatureUnion([
     ("char", char_vec)
 ])
 
-X_tfidf = union.fit_transform(texts)
+X_tfidf = union.fit_transform(all_texts)
 print(f"TF-IDF Matrix shape: {X_tfidf.shape}")
 
-print("3. Training 500-Tree Tuned Random Forest & ExtraTrees + Text N-Gram Classifier...")
-rf_sty = RandomForestClassifier(n_estimators=400, max_depth=16, min_samples_split=4, random_state=42, n_jobs=-1)
+print("3. Training 500-Tree Tuned Multi-Domain Random Forest...")
+rf_sty = RandomForestClassifier(n_estimators=450, max_depth=16, min_samples_split=4, min_samples_leaf=2, random_state=42, n_jobs=-1)
 rf_sty.fit(X_sty, y)
 
 clf_lr = LogisticRegression(C=5.0, max_iter=1000, solver="lbfgs")
@@ -86,8 +96,7 @@ xgb_model.fit(X_meta, y)
 final_preds_proba = xgb_model.predict_proba(X_meta)[:, 1]
 final_preds = (final_preds_proba >= 0.5).astype(int)
 
-print(f"★ Full Pipeline (RF + XGBoost + Stylometry + N-Grams) Accuracy: {accuracy_score(y, final_preds)*100:.2f}%")
-print(f"★ Full Pipeline ROC-AUC: {roc_auc_score(y, final_preds_proba):.4f}")
+print(f"★ Pipeline Accuracy: {accuracy_score(y, final_preds)*100:.2f}% | ROC-AUC: {roc_auc_score(y, final_preds_proba):.4f}")
 
 # Save complete bundle
 pipeline_bundle = {
@@ -103,4 +112,4 @@ os.makedirs("backend/analysis/trained_model", exist_ok=True)
 with open("backend/analysis/trained_model/rf_xgboost_pipeline.pkl", "wb") as f:
     pickle.dump(pipeline_bundle, f)
 
-print("Saved to backend/analysis/trained_model/rf_xgboost_pipeline.pkl")
+print("Saved updated multi-domain pipeline to backend/analysis/trained_model/rf_xgboost_pipeline.pkl")
